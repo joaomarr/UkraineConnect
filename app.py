@@ -1,9 +1,9 @@
 from flask import Flask, flash, redirect, render_template, request, session
 from flask_session import Session
+from flask_sqlalchemy import SQLAlchemy
 from helpers import login_required, get_oblasts
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO
-import SQLAlchemy
 import requests
 import json
 import os
