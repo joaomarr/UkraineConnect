@@ -1,0 +1,241 @@
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 62.5%;
+}
+
+main {
+  display: flex;
+  justify-content: flex-end;
+}
+
+header {
+  z-index: 2;
+}
+
+svg {
+  cursor: pointer;
+}
+
+.nav-left {
+  margin: 0 8vw;
+}
+
+.links {
+  padding-left: 1.5rem;
+}
+
+.content-div {
+  padding: 8vh 2rem;
+  width: 30vw;
+  height: 100vh;
+  background: #212529;
+  color: #0355c5;
+}
+
+.label1 {
+  color: #ffd500;
+}
+
+.login {
+  width: 80%;
+  height: 6rem;
+  background-color: #0355c5;
+  font-size: 2rem;
+  font-weight: bold;
+  border-radius: 19px;
+  transition: all 0.5s;
+}
+
+.login:hover {
+  background-color: #0355c5;
+  color: #ffd500;
+  border: 1px solid #0355c5;
+  border-radius: 24px;
+  box-shadow: 0 0 20px rgba(104, 85, 224, 0.6);
+}
+
+.form-control {
+  padding: 1rem;
+}
+
+.log-in-animated {
+  transition: all 300ms ease;
+}
+
+.fade {
+  opacity: 0;
+}
+
+.popupStyle .leaflet-popup-content {
+  margin: 0;
+}
+
+.popupStyle .leaflet-popup-content-wrapper {
+  background: #212529;
+  padding: 0;
+}
+
+.popupStyle .leaflet-popup-tip {
+  background: #212529;
+  padding: 0;
+}
+
+.about-logo-div,
+.about-logo-div > img {
+  width: 24vw;
+}
+
+#mapDiv,
+#map {
+  width: 100%;
+  height: 100vh;
+  z-index: 1;
+}
+
+.shadow-large {
+  box-shadow: 1rem 1rem 3rem rgba(33, 37, 41, 0.7),
+    1rem -1rem 3rem rgba(33, 37, 41, 0.2);
+}
+
+h2 {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+h2 small {
+  font-weight: normal;
+  color: #0355c5;
+  display: block;
+}
+
+.group {
+  position: relative;
+  margin: 5rem 0;
+}
+input {
+  height: 6rem;
+  color: #f0ad4e;
+  font-size: 18px;
+  padding: 10px 10px 10px 5px;
+  display: block;
+  border: none;
+  border-bottom: 1px solid #757575;
+  background: transparent;
+}
+input:focus {
+  outline: none;
+}
+
+@media (max-width: 1470px) {
+  htmL {
+    font-size: 40%;
+  }
+  .content-div {
+    width: 40vw;
+  }
+}
+
+/* LABEL ======================================= */
+label {
+  color: #0355c5;
+  font-size: 18px;
+  font-weight: normal;
+  position: absolute;
+  pointer-events: none;
+  left: 5px;
+  top: 10px;
+  transition: 0.2s ease all;
+  -moz-transition: 0.2s ease all;
+  -webkit-transition: 0.2s ease all;
+}
+
+/* active state */
+input:focus ~ label,
+input:valid ~ label {
+  top: -20px;
+  font-size: 1.5rem;
+  color: #f0ad4e;
+}
+
+/* BOTTOM BARS ================================= */
+.bar {
+  position: relative;
+  display: block;
+  width: 300px;
+}
+.bar:before,
+.bar:after {
+  content: "";
+  height: 2px;
+  width: 0;
+  bottom: 1px;
+  position: absolute;
+  background: #0355c5;
+  transition: 0.2s ease all;
+  -moz-transition: 0.2s ease all;
+  -webkit-transition: 0.2s ease all;
+}
+.bar:before {
+  left: 50%;
+}
+.bar:after {
+  right: 50%;
+}
+
+/* active state */
+input:focus ~ .bar:before,
+input:focus ~ .bar:after {
+  width: 50%;
+}
+
+/* HIGHLIGHTER ================================== */
+.highlight {
+  position: absolute;
+  height: 60%;
+  width: 100px;
+  top: 25%;
+  left: 0;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* active state */
+input:focus ~ .highlight {
+  -webkit-animation: inputHighlighter 0.3s ease;
+  -moz-animation: inputHighlighter 0.3s ease;
+  animation: inputHighlighter 0.3s ease;
+}
+
+/* ANIMATIONS ================ */
+@-webkit-keyframes inputHighlighter {
+  from {
+    background: #0355c5;
+  }
+  to {
+    width: 0;
+    background: transparent;
+  }
+}
+@-moz-keyframes inputHighlighter {
+  from {
+    background: #0355c5;
+  }
+  to {
+    width: 0;
+    background: transparent;
+  }
+}
+@keyframes inputHighlighter {
+  from {
+    background: #0355c5;
+  }
+  to {
+    width: 0;
+    background: transparent;
+  }
+}

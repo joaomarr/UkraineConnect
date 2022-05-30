@@ -1,0 +1,59 @@
+{% extends "layout.html" %} {% block title %} Login {% endblock %} {% block head
+%}
+<link rel="stylesheet" href="/static/style/style1.css" />
+{% endblock %} {% block main %}
+<div class="content-div" style="z-index: 1">
+  <form autocomplete="off" action="/login" method="post">
+    <h1 class="log-in-animated text-start h1 fw-bold mt-5">Увійти</h1>
+    <span class="text-start text-secondary mt-5"
+      >Вам потрібно увійти, щоб поділитися своїм досвідом. Якщо у вас немає
+      облікового запису, зареєструйтеся.</span
+    >
+    <hr />
+    <span class="text-start text-secondary mb-5"
+      >You need to login to share your experience. If you don't have an account,
+      register yourself.</span
+    >
+    <div class="group">
+      <input class="w-100" type="email" id="email" name="email" required />
+      <span class="highlight w-100"></span>
+      <span class="bar w-100"></span>
+      <label>Email</label>
+    </div>
+    <div class="group">
+      <input
+        class="w-100"
+        type="password"
+        id="password"
+        name="password"
+        required
+      />
+      <span class="highlight w-100"></span>
+      <span class="bar w-100"></span>
+      <label>Password</label>
+    </div>
+    <div class="form-group text-center">
+      <button type="submit" class="login btn btn-outline-light mb-3">
+        Sign In
+      </button>
+    </div>
+    <span class="text-secondary"
+      >Dont have an account?
+      <a href="/register" class="text-decoration-none">Register.</a></span
+    >
+  </form>
+</div>
+<div id="mapDiv" class="position-relative">
+  <div
+    class="loading position-absolute top-0 left-0 w-100 h-100 d-flex justify-content-center align-items-center bg-warning bg-gradient"
+    style="z-index: 2; transition: all 350ms"
+  >
+    <div
+      class="spinner-border text-primary"
+      role="status"
+      style="width: 8rem; height: 8rem"
+    ></div>
+  </div>
+  <div id="map"></div>
+</div>
+{% endblock %}

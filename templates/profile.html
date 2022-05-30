@@ -1,0 +1,87 @@
+{% extends "layout.html" %}
+
+{% block title %}
+  Profile
+{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="/static/style/style2.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0-alpha.2/cropper.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0-alpha.2/cropper.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0-alpha.2/cropper.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/2.0.0-alpha.2/cropper.js"></script>
+<script defer src="{{
+    url_for('static', filename='js/style.js') }}">
+  </script>
+{% endblock %}
+
+{% block main %}
+<form action="/profile" method="post" enctype="multipart/form-data">
+    <div class="modals hidden">
+        <div class="modal-header">
+            <h5 class="modal-title">Upload profile photo</h5>
+            <span class="btn--close-modal">×</span>
+        </div>
+        <div class="modal-body text-center">
+            <img id="img" src="">
+        </div>
+        <div class="modal-footer">
+            <input type="file" name="photo" class="form-control photo-input" autocomplete="off" required>
+            <input type="submit" value="Submit" class="btn btn-info photo-submit">
+        </div>
+    </div>
+
+</form>
+<div class="content-div py-5">
+    <div class="container rounded bg-white py-5">
+        <form class="row py-5" action="/editProfile" method="post">
+            <div class="col-md-3 border-right text-center">
+                <div class="d-flex flex-column align-items-center text-center btn--show-modal img-div img">
+                    <img class="rounded-circle" width="200px"
+                      {% if user["photo_filename"] %}
+                      height="200px"
+                      src={{ user["photo_filename"] }}>
+                      {% else %}
+                      src="https://www.rogowaylaw.com/wp-content/uploads/Blank-Employee.jpg">
+                      {% endif %}
+                      <div class="editPhotoIcon justify-content-center hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="40%" fill="white" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                            <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/>
+                            <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"/>
+                          </svg>
+                      </div>
+                </div>
+                <div class="span d-flex flex-column">
+                    <span class="font-weight-bold">{{ user["name"] }}</span><span class="text-black-50">{{ user["email"] }}</span>
+                </div>
+                <a class="fade-edit-text text-warning text-decoration-none fade h4" href="#">Edit Photo</a>
+            </div>
+              <div class="col-md-7 border-right">
+                  <div class="p-3 py-5">
+                          <div class="d-flex justify-content-between align-items-center experience mb-3 mx-5"><h4 class="text-right">профіль / <span class="text-secondary h6">Profile</span></h4></div>
+                          <div class="row mt-3">
+                            <label class="h5 text-warning mx-5">Iм'я</label>
+                            <div class="d-flex flex-row input-group col-md-12 mb-4">
+                                <input type="text" class="form-control" placeholder="Name" name="name" value="{{ user['name'] }}" class="user-name">
+                            </div>
+                            <label class="h5 text-warning mx-5">Електронна пошта</label>
+                            <div class="input-group col-md-12">
+                                <input type="email" class="form-control" placeholder="Email" name="email" value="{{ user["email"] }}" class="user-email">
+                            </div>
+                            <div class="input-group col-md-5 mt-5">
+                                <button class="input-group-text btn-primary w-5-" id="basic-addon1">
+                                    <span class="mx-3 h5">Update infos</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16">
+                                        <path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"></path>
+                                        <path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5v11z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                  </div>
+              </div>
+        </form>
+    </div>
+</div>
+
+<div class="overlay hidden"></div>
+{% endblock %}

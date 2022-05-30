@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="/static/style/Logo3.png" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <script crossorigin="anonymous" src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p"></script>
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+    <script defer src="{{url_for('static', filename='js/ukraineGeo.js') }}"></script>
+    {% block head %}
+    {% endblock %}
+    <script>
+      var message;
+    {% if message %}
+      message = {{  message|tojson }};
+    {% endif %}
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+      integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+      crossorigin=""
+    />
+    <script
+      defer
+      src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+      integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+      crossorigin=""
+    ></script>
+
+    <script defer src="{{
+      url_for('static', filename='js/app.js') }}"></script>
+    <script defer src="{{
+      url_for('static', filename='js/style.js') }}">
+    </script>
+    <title>Ukraine Connect - {% block title %}{% endblock %}</title>
+  </head>
+  <body>
+    <header class="p-3 bg-dark text-white position-fixed w-100">
+      <div class="container">
+        <div class="d-flex align-items-center nav-left">
+          <a href="/" class="d-flex align-items-center"><img src="/static/style/Logo3.png" class="logo3" height="40px"></a>
+          <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 links">
+            <li class="nav-link px-2"><a href="/">Home</a></li>
+            <li class="nav-link px-2"><a href="https://www.forbes.com/advisor/personal-finance/donate-relief-to-ukraine/" target="_blank">Donation</a></li>
+            <li class="nav-link px-2"><a href="mailto:marrajoaosa@gmail.com" target="_blank">Contact</a></li>
+          </ul>
+          {% if user %}
+          <div class="dropdown text-end">
+            <a href="#" class="d-block link-primary text-decoration-none dropdown-toggle show" id="dropdownUser1">
+              <img height="40" class="rounded-circle" src=
+                {% if user["photo_filename"] %}
+                  {{ user["photo_filename"] }}>
+                {% else %}
+                  "https://www.rogowaylaw.com/wp-content/uploads/Blank-Employee.jpg" width="40">
+                {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="dropdownUser1" data-popper-placement="bottom-start" style="position: absolute; inset: 0px auto auto 0px; margin: 0px; transform: translate3d(0px, 34px, 0px);">
+              <li><a class="dropdown-item" href="/post" target="_self">Post</a></li>
+              <li><a class="dropdown-item" href="/profile">Profile</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item active" href="/logout">Sign out</a></li>
+            </ul>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+    <main>
+      {% block main %}
+      {% endblock %}
+    </main>
+    {% if user %}
+      {% else %}
+      <div class="shadow-large">
+        <div class="w-100 d-flex bg-dark text-secondary text-center py-5">
+          <div class="about-logo-div p-md-3 d-flex align-items-center justify-content-center py-5">
+            <img src="/static/style/Logo1.png">
+          </div>
+          <div class="px-5 py-5 my-5 d-flex flex-column">
+            <h1 class="display-1 fw-bold mb-3 text-white">Our purpose</h1>
+            <div class="col-lg-8 mx-auto">
+              <p class="mb-4 h4">Ukraine Connect – це наша спроба допомогти українцям, відновити зв’язок один з одним і зібрати інформацію, щоб принаймні не впасти на самоті в цій страшній війні. Наша мета – мінімізувати наслідки війни для зв’язку між людьми.</p>
+              <hr>
+              <p class="mb-4">Ukraine Connect it's our try to help ukraine people, to reconnect each other and gather information to at least don't fell alone at this terrible war. Our goal is to minimize the war effects to the connection bettwen people.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container my-5 py-5">
+        <div class="row p-4 pb-0 pe-lg-0 pt-lg-5 align-items-center rounded-3 border shadow-lg">
+          <div class="col-lg-7 p-3 p-lg-5 pt-lg-3">
+            <h1 class="display-4 fw-bold lh-1">Знайте, як допомогти тим, хто найбільше потребує</h1>
+            <p class="lead">Якщо ви українець, але він у кращій ситуації, ніж інші, ви можете допомогти своїм людям пожертвуваннями. Натисніть кнопку «Пожертвування», щоб переглянути статтю з найкращими способами це зробити. Також стосується сторонніх осіб.</p>
+            <hr>
+            <p class="h7 text-secondary">If you are ukrainian but it's in a better situation rather others, you can help your people with donations. Click in the button "Donation" an see an article with the best ways of doing it. Also applies to outsiders.</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start mb-4 mb-lg-3">
+              <a href="https://www.forbes.com/advisor/personal-finance/donate-relief-to-ukraine/" class="btn btn-primary btn-lg px-4 me-md-2 fw-bold">Пожертвуйте</a>
+            </div>
+          </div>
+          <div class="col-lg-4 offset-lg-1 p-0 overflow-hidden shadow-large">
+              <img class="rounded-lg-4" src="https://www.aljazeera.com/wp-content/uploads/2022/02/2022-02-28T064333Z_680867134_RC2USS9IZF8C_RTRMADP_3_UKRAINE-CRISIS-POLAND.jpg?resize=770%2C513" alt="" width="720">
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <footer class="d-flex flex-wrap justify-content-between align-items-center py-3 my-4 border-top">
+          <a href="/" class="col-md-4 d-flex align-items-center justify-content-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
+            <img src="/static/style/Logo2.png"></svg>
+          </a>
+          <p class="col-md-4 mb-0 text-muted">© 2022 Copyright by, <a href="https://github.com/joaomarr" target="_blank" class="text-secondary">João Vitor Marra</a></p>
+          <ul class="nav col-md-4 justify-content-end">
+            <li class="nav-item"><a href="/contact" class="nav-link px-2 text-muted">Contact</a></li>
+            <li class="nav-item"><a href="https://www.forbes.com/advisor/personal-finance/donate-relief-to-ukraine/" class="nav-link px-2 text-muted">Donate</a></li>
+            <li class="nav-item"><a href="/register" class="nav-link px-2 text-muted">Register</a></li>
+        </footer>
+      </div>
+      {% endif %}
+  </body>
+</html>

@@ -1,0 +1,162 @@
+html {
+  font-size: 62.5%;
+}
+
+header {
+  z-index: 2;
+}
+
+.border-right {
+  border-right: 2px solid rgba(59, 59, 59, 0.35);
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #005bbb;
+}
+
+.edit {
+  text-decoration: underline;
+  color: #005bbb;
+  cursor: pointer;
+}
+
+.profile-button {
+  background: #005bbb;
+  box-shadow: none;
+  border: none;
+}
+
+.profile-button:hover {
+  background: #005bbb;
+}
+
+.profile-button:focus {
+  background: #005bbb;
+  box-shadow: none;
+}
+
+.profile-button:active {
+  background: #005bbb;
+  box-shadow: none;
+}
+
+.labels {
+  font-size: 11px;
+}
+
+.add-experience {
+  transition: all 500ms;
+}
+
+.add-experience:hover {
+  background: #005bbb;
+  color: #fff;
+  cursor: pointer;
+}
+
+.selected {
+  display: none;
+  visibility: hidden;
+}
+
+#text {
+  min-height: 15rem;
+}
+
+img {
+  transition: all 500ms ease;
+  cursor: pointer;
+}
+img:hover {
+  opacity: 0.9;
+}
+
+.modals {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 80rem;
+  background-color: #f3f3f3;
+  border-radius: 10px;
+  padding: 3rem 4rem;
+  box-shadow: 0 4rem 6rem rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  transition: all 0.5s;
+}
+
+#img {
+  max-height: 30rem;
+}
+
+.cropper-crop-box,
+.cropper-view-box {
+  border-radius: 50%;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  transition: all 0.5s;
+}
+
+.modal__form {
+  margin: 0 3rem;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  align-items: center;
+  gap: 2.5rem;
+}
+
+.btn--close-modal {
+  font-family: inherit;
+  color: inherit;
+  position: absolute;
+  top: 1rem;
+  right: 2rem;
+  font-size: 3rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+.img-div {
+  position: relative;
+}
+
+svg {
+  cursor: pointer;
+}
+
+.editPhotoIcon {
+  position: absolute;
+  height: 100%;
+  transition: all 300ms ease;
+}
+
+.editPhotoIcon > svg {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+}
+
+.nav-left {
+  margin: 0 8vw;
+}
+
+.links {
+  padding-left: 1.5rem;
+}

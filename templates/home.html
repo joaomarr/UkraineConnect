@@ -1,0 +1,18 @@
+{% extends "layout.html" %} {% block title %} Home {% endblock %} {% block head
+%}
+<link rel="stylesheet" href="/static/style/style1.css" />
+{% endblock %} {% block main %}
+<div id="mapDiv">
+  <div
+    class="loading position-absolute top-0 left-0 w-100 h-100 d-flex justify-content-center align-items-center bg-warning bg-gradient"
+    style="z-index: 2; transition: all 350ms"
+  >
+    <div
+      class="spinner-border text-primary"
+      role="status"
+      style="width: 8rem; height: 8rem"
+    ></div>
+  </div>
+  <div id="map"></div>
+</div>
+{% endblock %}

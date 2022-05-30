@@ -1,0 +1,133 @@
+{% extends "layout.html" %} {% block title %} Post {% endblock %} {% block head
+%}
+<link rel="stylesheet" href="/static/style/style2.css" />
+{% endblock %} {% block main %}
+<div class="content-div py-5">
+  <div class="container rounded bg-white py-5">
+    <form class="row py-5" action="/post" method="post">
+      <div class="col-md-3 border-right">
+        <div class="d-flex flex-column align-items-center text-center p-3">
+          <a href="/profile"
+            ><img class="rounded-circle" width="200px" {% if
+            user["photo_filename"] %} height="200px" src={{
+            user["photo_filename"] }}> {% else %}
+            src="https://www.rogowaylaw.com/wp-content/uploads/Blank-Employee.jpg">
+            {% endif %}
+          </a>
+          <div class="span d-flex flex-column">
+            <span class="font-weight-bold">{{ user["name"] }}</span
+            ><span class="text-black-50">{{ user["email"] }}</span>
+          </div>
+          <a class="edit" href="/profile">Edit Profile</a>
+        </div>
+      </div>
+      <div class="col-md-5 border-right">
+        <div class="p-3 py-5">
+          <div
+            class="d-flex justify-content-between align-items-center experience mb-3"
+          >
+            <h4 class="text-right">
+              Місцевий / <span class="text-secondary h6">Local</span>
+            </h4>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-8">
+              <label class="labels">адреса</label
+              ><input
+                type="text"
+                class="form-control"
+                placeholder="Adress"
+                value=""
+                name="adress"
+                required
+              />
+            </div>
+            <div class="col-md-4">
+              <label class="labels">*номер адреси</label
+              ><input
+                type="text"
+                class="form-control"
+                placeholder="*Number"
+                value=""
+                name="number"
+              />
+            </div>
+            <div class="col-md-12">
+              <label class="labels">мі́сто</label
+              ><input
+                type="text"
+                class="form-control"
+                placeholder="City"
+                value=""
+                required
+                name="city"
+              />
+            </div>
+          </div>
+          <div class="row mt-3">
+            <div class="col-md-6">
+              <label class="labels">область</label>
+              <select id="oblast" name="oblast" class="form-select" required>
+                <option value="hide" selected class="selected">
+                  Oblast/Region
+                </option>
+                {% for oblast in oblasts %}
+                <option value="{{ oblast }} Oblast">{{ oblast }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="labels">*пошто́вий і́ндекс</label
+              ><input
+                type="text"
+                max="5"
+                class="form-control"
+                value=""
+                placeholder="*PostCode/ZIP"
+                maxlength="5"
+                name="zipcode"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="p-3 py-5">
+          <div
+            class="d-flex justify-content-between align-items-center experience mb-3"
+          >
+            <h4 class="text-right">
+              Повідомлення / <span class="text-secondary h6">Message</span>
+            </h4>
+            <button type="submit" class="btn btn-warning add-experience">
+              Пошта / Post
+            </button>
+          </div>
+          <div class="col-md-12">
+            <label class="labels">Титул</label
+            ><input
+              type="text"
+              class="form-control"
+              placeholder="Title"
+              value=""
+              name="title"
+              required
+            />
+          </div>
+          <div class="col-md-12">
+            <label class="labels">Ваш текст</label
+            ><textarea
+              class="form-control text"
+              id="text"
+              placeholder="Your Text"
+              value=""
+              name="text"
+              required
+            ></textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
