@@ -1,9 +1,9 @@
 from flask import redirect, session
 from functools import wraps
-from cs50 import SQL
+import SQLAlchemy
 
 
-db = SQL("postgresql://jcbbzhfcombkdo:394fb3d023eba39a9ad5727189c8bc1f07c6af10cc257e6b4ac0960820363401@ec2-3-234-131-8.compute-1.amazonaws.com:5432/d38ao6p1p1btdb")
+db = SQLAlchemy("postgresql://jcbbzhfcombkdo:394fb3d023eba39a9ad5727189c8bc1f07c6af10cc257e6b4ac0960820363401@ec2-3-234-131-8.compute-1.amazonaws.com:5432/d38ao6p1p1btdb")
 
 def login_required(f):
     @wraps(f)

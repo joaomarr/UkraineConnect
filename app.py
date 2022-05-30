@@ -1,9 +1,9 @@
 from flask import Flask, flash, redirect, render_template, request, session
-from cs50 import SQL
 from flask_session import Session
 from helpers import login_required, get_oblasts
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO
+import SQLAlchemy
 import requests
 import json
 import os
@@ -14,6 +14,7 @@ app = Flask(__name__)
 app.secret_key = 'ukraineconnect'
 socketio = SocketIO(app)
 
+app.config["SQLALCHEMY_DATABASE_URI"] = "postgresql://jcbbzhfcombkdo:394fb3d023eba39a9ad5727189c8bc1f07c6af10cc257e6b4ac0960820363401@ec2-3-234-131-8.compute-1.amazonaws.com:5432/d38ao6p1p1btdb"
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
@@ -25,7 +26,7 @@ if __name__ == '__main__':
 
 Session(app)
 
-db = SQL("postgresql://jcbbzhfcombkdo:394fb3d023eba39a9ad5727189c8bc1f07c6af10cc257e6b4ac0960820363401@ec2-3-234-131-8.compute-1.amazonaws.com:5432/d38ao6p1p1btdb")
+db = SQLAlchemy(app)
 
 @app.route("/")
 @login_required
