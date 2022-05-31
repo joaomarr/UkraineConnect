@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from helpers import login_required, get_oblasts
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO
+import datetime
 import requests
 import json
 import os
@@ -23,10 +24,28 @@ app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
 
 if __name__ == '__main__':
     socketio.run(app)
-
 Session(app)
 
 db = SQLAlchemy(app)
+
+class users(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String, nullable=False)
+    email = db.Column(db.String, nullable=False)
+    hash = db.Column(db.String, nullable=False)
+    photo_filename = db.Column(db.String)
+
+class posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    text = db.Column(db.Text, nullable=False)
+    title = db.Column(db.Text, nullable=False)
+    date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
+
+class likes(db.Model):
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
 
 @app.route("/")
 @login_required
