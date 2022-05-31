@@ -26,7 +26,7 @@ if __name__ == '__main__':
     socketio.run(app)
 Session(app)
 
-db = SQLAlchemy(app).engine
+db = SQLAlchemy(app)
 
 class users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -51,8 +51,8 @@ class likes(db.Model):
 @login_required
 def home():
     """Show all messages"""
-    posts = db.execute("SELECT * FROM posts")
-    user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    posts = db.engine.execute("SELECT * FROM posts")
+    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
     return render_template("home.html", posts=posts, user=user)
 
 
@@ -60,7 +60,7 @@ def home():
 def login():
     """Introduction and login page"""
     session.clear()
-    posts = db.execute("SELECT * FROM posts")
+    posts = db.engine.execute("SELECT * FROM posts")
 
     if request.method == "POST":
         """Login confirmation"""
@@ -76,7 +76,7 @@ def login():
             message = {'text': "Must provide password", 'category': "warning"}
             return render_template("login.html", posts=posts, message=message)
 
-        rows = db.execute("SELECT * FROM users WHERE email=?", email)
+        rows = db.engine.execute("SELECT * FROM users WHERE email=?", email)
 
         if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
             message = {'text': "Invalid username and/or password", 'category': "danger"}
@@ -93,7 +93,7 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register the user"""
-    posts = db.execute("SELECT * FROM posts")
+    posts = db.engine.execute("SELECT * FROM posts")
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
@@ -105,9 +105,9 @@ def register():
 
         hash = generate_password_hash(password)
 
-        if not db.execute("SELECT * FROM users WHERE email=?", email):
+        if not db.engine.execute("SELECT * FROM users WHERE email=?", email):
             try:
-                db.execute("INSERT INTO users (name, email, hash) VALUES (?, ?, ?)", name, email, hash)
+                db.engine.execute("INSERT INTO users (name, email, hash) VALUES (?, ?, ?)", name, email, hash)
             except:
                 message = {'text': "Something gone wrong", 'category': "danger"}
                 return render_template("register.html", posts=posts, message=message)
@@ -115,7 +115,7 @@ def register():
             message = {'text': 'You already have an account, <a href="/login">sign in</a>.', 'category': "danger"}
             return render_template("register.html", posts=posts, message=message)
 
-        session["user_id"] = db.execute("SELECT user_id FROM users WHERE email=?" ,email)[0]["user_id"]
+        session["user_id"] = db.engine.execute("SELECT user_id FROM users WHERE email=?" ,email)[0]["user_id"]
 
         return redirect("/")
 
@@ -126,7 +126,7 @@ def register():
 @login_required
 def post():
     """Post user comments"""
-    user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
     if request.method == "POST":
 
         adress = str(request.form.get("adress"))
@@ -158,7 +158,7 @@ def post():
             return render_template("post.html", message=message, oblasts=get_oblasts(), user=user)
 
         try:
-            db.execute('INSERT INTO posts (user_id, text, title, lat, long) VALUES (?, ?, ?, ?, ?)', session['user_id'], text, title, lat, long)
+            db.engine.execute('INSERT INTO posts (user_id, text, title, lat, long) VALUES (?, ?, ?, ?, ?)', session['user_id'], text, title, lat, long)
         except:
             message = {'text': 'Something gone wrong', 'category': 'danger'}
             return render_template("post.html", message=message, oblasts=get_oblasts(), user=user)
@@ -177,26 +177,26 @@ def profile():
             file = request.files['file']
             filename = str(session["user_id"]) + "." + "png"
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            db.execute("UPDATE users SET photo_filename=? WHERE user_id=?", os.path.join(app.config['UPLOAD_FOLDER'], filename), session["user_id"])
+            db.engine.execute("UPDATE users SET photo_filename=? WHERE user_id=?", os.path.join(app.config['UPLOAD_FOLDER'], filename), session["user_id"])
             message = {'text': "Your profile image was changed successfuly!", 'category': 'success'}
-            user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+            user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
             return redirect("/profile")
 
     else:
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         return render_template("profile.html", user=user)
 
 @app.route("/getPosts", methods=["POST"])
 def get_posts():
     posts = {}
-    postsData = db.execute("SELECT * FROM posts")
+    postsData = db.engine.execute("SELECT * FROM posts")
 
     for postData in postsData:
         user_id = postData['user_id']
         post_id = postData['id']
         posts[post_id] = postData
 
-        user_info = db.execute("SELECT user_id, name, photo_filename FROM users WHERE user_id=?", user_id)[0]
+        user_info = db.engine.execute("SELECT user_id, name, photo_filename FROM users WHERE user_id=?", user_id)[0]
 
         posts[post_id]['userName'] = user_info['name']
         posts[post_id]['userPhotoFilename'] = user_info['photo_filename']
@@ -206,12 +206,12 @@ def get_posts():
                 posts[post_id]["isFromUser"] = True
             else:
                 posts[post_id]["isFromUser"] = False
-            if db.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], post_id):
+            if db.engine.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], post_id):
                 posts[post_id]["liked"] = True
             else:
                 posts[post_id]["liked"] = False
 
-        posts[post_id]["likes"] = db.execute("SELECT COUNT(*) FROM likes WHERE post_id=?", post_id)[0]["COUNT(*)"]
+        posts[post_id]["likes"] = db.engine.execute("SELECT COUNT(*) FROM likes WHERE post_id=?", post_id)[0]["COUNT(*)"]
 
     return json.dumps(posts)
 
@@ -222,29 +222,29 @@ def editProfile():
     name = request.form.get('name')
     email = request.form.get('email')
 
-    user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
     user_name = user['name']
     user_email = user['email']
 
     if name == user_name and email == user_email:
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         return render_template("profile.html", user=user)
 
     if name != user_name and email != user_email:
-        db.execute("UPDATE users SET name=?, email=? WHERE user_id=?", name, email, session['user_id'])
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        db.engine.execute("UPDATE users SET name=?, email=? WHERE user_id=?", name, email, session['user_id'])
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         message = {'text': "Your name and email have been successfully changed!", 'category': 'success'}
         return render_template("profile.html", user=user, message=message)
 
     if name != user_name:
-        db.execute("UPDATE users SET name=? WHERE user_id=?", name, session['user_id'])
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        db.engine.execute("UPDATE users SET name=? WHERE user_id=?", name, session['user_id'])
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         message = {'text': "Your name was changed successfully!", 'category': 'success'}
         return render_template("profile.html", user=user, message=message)
 
     if email != user_email:
-        db.execute("UPDATE users SET email=? WHERE user_id=?", email, session['user_id'])
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        db.engine.execute("UPDATE users SET email=? WHERE user_id=?", email, session['user_id'])
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         message = {'text': "Your email was changed successfully!", 'category': 'success'}
         return render_template("profile.html", user=user, message=message)
 
@@ -253,36 +253,36 @@ def editProfile():
 def submitLike(data):
     id = data["id"]
     try:
-        user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-        post = db.execute("SELECT * FROM posts WHERE id=?", id)[0]
+        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        post = db.engine.execute("SELECT * FROM posts WHERE id=?", id)[0]
     except:
         return print('not logged or not valid post')
 
     dataUser = {}
     dataUser["id"] = id
 
-    if db.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id):
-        db.execute("DELETE FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id)
+    if db.engine.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id):
+        db.engine.execute("DELETE FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id)
         dataUser["liked"] = True
         socketio.emit("showLike", dataUser)
     else:
-        db.execute("INSERT INTO likes (user_id, post_id) VALUES(?,?)", session["user_id"], post['id'])
+        db.engine.execute("INSERT INTO likes (user_id, post_id) VALUES(?,?)", session["user_id"], post['id'])
         dataUser["liked"] = False
         socketio.emit("showLike", dataUser)
 
 @socketio.on("deletePost")
 def deletePost(data):
-    posts = db.execute("SELECT * FROM posts")
-    user = db.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    posts = db.engine.execute("SELECT * FROM posts")
+    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
     post_id = data["post_id"]
-    user_id = db.execute("SELECT user_id FROM posts WHERE id=?", post_id)[0]['user_id']
+    user_id = db.engine.execute("SELECT user_id FROM posts WHERE id=?", post_id)[0]['user_id']
 
     if user_id == session["user_id"]:
         data["id"] = post_id
         try:
-            db.execute("DELETE FROM posts WHERE user_id=? AND id=?", user_id, post_id)
-            if db.execute("SELECT * FROM likes WHERE post_id=?", post_id):
-                db.execute("DELETE FROM likes WHERE post_id=?", post_id)
+            db.engine.execute("DELETE FROM posts WHERE user_id=? AND id=?", user_id, post_id)
+            if db.engine.execute("SELECT * FROM likes WHERE post_id=?", post_id):
+                db.engine.execute("DELETE FROM likes WHERE post_id=?", post_id)
         except:
             return
         return socketio.emit("postDeleted")
