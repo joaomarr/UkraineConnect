@@ -26,7 +26,7 @@ if __name__ == '__main__':
     socketio.run(app)
 Session(app)
 
-db = SQLAlchemy(app)
+db = SQLAlchemy(app).engine
 
 class users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
