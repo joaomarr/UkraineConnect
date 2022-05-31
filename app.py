@@ -37,7 +37,7 @@ class users(db.Model):
 
 class posts(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     text = db.Column(db.Text, nullable=False)
     title = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
