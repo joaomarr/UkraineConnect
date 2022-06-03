@@ -4,7 +4,6 @@ from flask_sqlalchemy import SQLAlchemy
 from helpers import login_required, get_oblasts
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO
-from flask_migrate import Migrate
 import datetime
 import requests
 import json
@@ -28,7 +27,6 @@ if __name__ == '__main__':
 Session(app)
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
 
 class Users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True)
