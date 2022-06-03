@@ -1,6 +1,5 @@
-const textHeader = document.querySelector(".log-in-animated");
-const dropdowns = document.querySelectorAll(".dropdown");
 const img = document.querySelector(".img");
+const dropdowns = document.querySelectorAll(".dropdown");
 const imgCrop = document.querySelector("#img");
 const photoInput = document.querySelector(".photo-input");
 const photoSubmit = document.querySelector(".photo-submit");
@@ -10,6 +9,7 @@ const modal = document.querySelector(".modals");
 const overlay = document.querySelector(".overlay");
 const btnCloseModal = document.querySelector(".btn--close-modal");
 const btnsOpenModal = document.querySelectorAll(".btn--show-modal");
+const textHeader = document.querySelector(".log-in-animated");
 
 if (message) {
   const messageAlert = `

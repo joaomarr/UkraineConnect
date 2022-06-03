@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from helpers import login_required, get_oblasts
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_socketio import SocketIO
+from flask_migrate import Migrate
 import datetime
 import requests
 import json
@@ -27,40 +28,45 @@ if __name__ == '__main__':
 Session(app)
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
-class users(db.Model):
-    user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+class Users(db.Model):
+    user_id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
     email = db.Column(db.String, nullable=False)
     hash = db.Column(db.String, nullable=False)
     photo_filename = db.Column(db.String)
 
-class posts(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+class Posts(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     text = db.Column(db.Text, nullable=False)
     title = db.Column(db.Text, nullable=False)
+    lat = db.Column(db.Text, nullable=False)
+    long = db.Column(db.Text, nullable=False)
     date = db.Column(db.DateTime, default=datetime.datetime.utcnow())
 
-class likes(db.Model):
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+
+class Likes(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'), nullable=False)
+
 
 @app.route("/")
 @login_required
 def home():
     """Show all messages"""
-    posts = db.engine.execute("SELECT * FROM posts")
-    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    posts = db.session.query(Posts).all()
+    user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
     return render_template("home.html", posts=posts, user=user)
-
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
     """Introduction and login page"""
     session.clear()
-    posts = db.engine.execute("SELECT * FROM posts")
+    posts = Posts.query.all()
 
     if request.method == "POST":
         """Login confirmation"""
@@ -76,14 +82,13 @@ def login():
             message = {'text': "Must provide password", 'category': "warning"}
             return render_template("login.html", posts=posts, message=message)
 
-        rows = db.engine.execute("SELECT * FROM users WHERE email=?", email)
+        user = db.session.query(Users).filter_by(email=email).first()
 
-        if len(rows) != 1 or not check_password_hash(rows[0]["hash"], password):
+        if not check_password_hash(user.hash, password):
             message = {'text': "Invalid username and/or password", 'category': "danger"}
             return render_template("login.html", posts=posts, message=message)
 
-        flash("You're logged in")
-        session["user_id"] = rows[0]["user_id"]
+        session["user_id"] = user.user_id
 
         return redirect("/")
 
@@ -93,7 +98,7 @@ def login():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register the user"""
-    posts = db.engine.execute("SELECT * FROM posts")
+    posts = Posts.query.all()
     if request.method == "POST":
         name = request.form.get("name")
         email = request.form.get("email")
@@ -105,9 +110,11 @@ def register():
 
         hash = generate_password_hash(password)
 
-        if not db.engine.execute("SELECT * FROM users WHERE email=?", email):
+        if not db.session.query(Users).filter_by(email=email).first():
             try:
-                db.engine.execute("INSERT INTO users (name, email, hash) VALUES (?, ?, ?)", name, email, hash)
+                user = Users(name=name, email=email, hash=hash)
+                db.session.add(user)
+                db.session.commit()
             except:
                 message = {'text': "Something gone wrong", 'category': "danger"}
                 return render_template("register.html", posts=posts, message=message)
@@ -115,7 +122,7 @@ def register():
             message = {'text': 'You already have an account, <a href="/login">sign in</a>.', 'category': "danger"}
             return render_template("register.html", posts=posts, message=message)
 
-        session["user_id"] = db.engine.execute("SELECT user_id FROM users WHERE email=?" ,email)[0]["user_id"]
+        session["user_id"] = db.session.query(Users).filter_by(email=email).first().user_id
 
         return redirect("/")
 
@@ -126,7 +133,7 @@ def register():
 @login_required
 def post():
     """Post user comments"""
-    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+    user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
     if request.method == "POST":
 
         adress = str(request.form.get("adress"))
@@ -158,7 +165,9 @@ def post():
             return render_template("post.html", message=message, oblasts=get_oblasts(), user=user)
 
         try:
-            db.engine.execute('INSERT INTO posts (user_id, text, title, lat, long) VALUES (?, ?, ?, ?, ?)', session['user_id'], text, title, lat, long)
+            post = Posts(user_id=session["user_id"], text=text, title=title, lat=lat, long=long)
+            db.session.add(post)
+            db.session.commit()
         except:
             message = {'text': 'Something gone wrong', 'category': 'danger'}
             return render_template("post.html", message=message, oblasts=get_oblasts(), user=user)
@@ -177,41 +186,57 @@ def profile():
             file = request.files['file']
             filename = str(session["user_id"]) + "." + "png"
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            db.engine.execute("UPDATE users SET photo_filename=? WHERE user_id=?", os.path.join(app.config['UPLOAD_FOLDER'], filename), session["user_id"])
-            message = {'text': "Your profile image was changed successfuly!", 'category': 'success'}
-            user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-            return redirect("/profile")
+
+            user = db.session.query(Users).filter_by(user_id=session['user_id']).first()
+            user.photo_filename = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            try:
+                db.session.commit()
+                message = {'text': "Your profile image was changed successfuly!", 'category': 'success'}
+                user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
+                return render_template("profile.html", user=user, message=message)
+            except:
+                message = {'text': "Something gone wrong!", 'category': 'success'}
+                user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
+                return render_template("profile.html", user=user, message=message)
 
     else:
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
+        user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
         return render_template("profile.html", user=user)
 
 @app.route("/getPosts", methods=["POST"])
 def get_posts():
     posts = {}
-    postsData = db.engine.execute("SELECT * FROM posts")
+    postsData = db.session.query(Posts).all()
 
     for postData in postsData:
-        user_id = postData['user_id']
-        post_id = postData['id']
-        posts[post_id] = postData
+        user_id = postData.user_id
+        post_id = postData.id
 
-        user_info = db.engine.execute("SELECT user_id, name, photo_filename FROM users WHERE user_id=?", user_id)[0]
+        posts[post_id] = {
+            'long': postData.long, 
+            'lat': postData.lat,
+            'title': postData.title,
+            'text': postData.text,
+            'postDate': str(postData.date),
+            'postId': postData.id,
+        }
+    
+        user_info = db.session.query(Users).filter_by(user_id=user_id).first()
 
-        posts[post_id]['userName'] = user_info['name']
-        posts[post_id]['userPhotoFilename'] = user_info['photo_filename']
+        posts[post_id]['userName'] = user_info.name
+        posts[post_id]['userPhotoFilename'] = user_info.photo_filename
 
         if "user_id" in session:
-            if user_info["user_id"] == session["user_id"]:
+            if user_info.user_id == session["user_id"]:
                 posts[post_id]["isFromUser"] = True
             else:
                 posts[post_id]["isFromUser"] = False
-            if db.engine.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], post_id):
+            if db.session.query(Likes).filter_by(user_id=session["user_id"], post_id=post_id).first():   
                 posts[post_id]["liked"] = True
             else:
                 posts[post_id]["liked"] = False
 
-        posts[post_id]["likes"] = db.engine.execute("SELECT COUNT(*) FROM likes WHERE post_id=?", post_id)[0]["COUNT(*)"]
+        posts[post_id]["likes"] = db.session.query(Likes).filter_by(post_id=post_id).count()
 
     return json.dumps(posts)
 
@@ -222,67 +247,100 @@ def editProfile():
     name = request.form.get('name')
     email = request.form.get('email')
 
-    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-    user_name = user['name']
-    user_email = user['email']
+    user = db.session.query(Users).filter_by(user_id=session["user_id"]).first()
+    user_name = user.name
+    user_email = user.email
 
     if name == user_name and email == user_email:
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
         return render_template("profile.html", user=user)
 
+    email_already_taken = db.session.query(Users).filter_by(email=email).first()
+    
     if name != user_name and email != user_email:
-        db.engine.execute("UPDATE users SET name=?, email=? WHERE user_id=?", name, email, session['user_id'])
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-        message = {'text': "Your name and email have been successfully changed!", 'category': 'success'}
-        return render_template("profile.html", user=user, message=message)
+        user.name = name
+        user.email = email
+
+        if email_already_taken:
+            message = {'text': "This email is already taken", 'category': 'warning'}
+            return render_template("profile.html", user=user, message=message)
+
+        try:
+            db.session.commit()
+            message = {'text': "Your name and email have been successfully changed!", 'category': 'success'}
+            return render_template("profile.html", user=user, message=message)
+        except:
+            message = {'text': "Something gone wrong!", 'category': 'success'}
+            return render_template("profile.html", user=user, message=message)
 
     if name != user_name:
-        db.engine.execute("UPDATE users SET name=? WHERE user_id=?", name, session['user_id'])
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-        message = {'text': "Your name was changed successfully!", 'category': 'success'}
-        return render_template("profile.html", user=user, message=message)
+        user.name = name
+        try:
+            db.session.commit()
+            message = {'text': "Your name was changed successfully changed!", 'category': 'success'}
+            print(db.session.query(Users).filter_by(user_id=session["user_id"]).first().name)
+            return render_template("profile.html", user=user, message=message)
+        except:
+            message = {'text': "Something gone wrong!", 'category': 'success'}
+            return render_template("profile.html", user=user, message=message)
 
     if email != user_email:
-        db.engine.execute("UPDATE users SET email=? WHERE user_id=?", email, session['user_id'])
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-        message = {'text': "Your email was changed successfully!", 'category': 'success'}
-        return render_template("profile.html", user=user, message=message)
+        if email_already_taken:
+            message = {'text': "This email is already taken", 'category': 'warning'}
+            return render_template("profile.html", user=user, message=message)
+
+        user.email = email
+        try:
+            db.session.commit()
+            message = {'text': "Your email was changed successfully changed!", 'category': 'success'}
+            return render_template("profile.html", user=user, message=message)
+        except:
+            message = {'text': "Something gone wrong!", 'category': 'success'}
+            return render_template("profile.html", user=user, message=message)
 
 
 @socketio.on("submitLike")
 def submitLike(data):
     id = data["id"]
     try:
-        user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
-        post = db.engine.execute("SELECT * FROM posts WHERE id=?", id)[0]
+        db.session.query(Users).filter_by(user_id=session["user_id"])
+        db.session.query(Posts).filter_by(id=id)
     except:
         return print('not logged or not valid post')
 
     dataUser = {}
     dataUser["id"] = id
 
-    if db.engine.execute("SELECT * FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id):
-        db.engine.execute("DELETE FROM likes WHERE user_id=? AND post_id=?", session["user_id"], id)
-        dataUser["liked"] = True
+    print(db.session.query(Likes).filter_by(post_id=id, user_id=session["user_id"]).first())
+
+    if db.session.query(Likes).filter_by(post_id=id, user_id=session["user_id"]).first() == None:
+        like = Likes(post_id=id, user_id=session["user_id"])
+        db.session.add(like)
+        db.session.commit()
+        dataUser["liked"] = False
         socketio.emit("showLike", dataUser)
     else:
-        db.engine.execute("INSERT INTO likes (user_id, post_id) VALUES(?,?)", session["user_id"], post['id'])
-        dataUser["liked"] = False
+        like = db.session.query(Likes).filter_by(post_id=id, user_id=session["user_id"]).first()
+        db.session.delete(like)
+        db.session.commit()
+        dataUser["liked"] = True
         socketio.emit("showLike", dataUser)
 
 @socketio.on("deletePost")
 def deletePost(data):
-    posts = db.engine.execute("SELECT * FROM posts")
-    user = db.engine.execute("SELECT * FROM users WHERE user_id=?", session['user_id'])[0]
     post_id = data["post_id"]
-    user_id = db.engine.execute("SELECT user_id FROM posts WHERE id=?", post_id)[0]['user_id']
+    user_id = db.session.query(Posts).filter_by(id=post_id).first().user_id
 
     if user_id == session["user_id"]:
         data["id"] = post_id
         try:
-            db.engine.execute("DELETE FROM posts WHERE user_id=? AND id=?", user_id, post_id)
-            if db.engine.execute("SELECT * FROM likes WHERE post_id=?", post_id):
-                db.engine.execute("DELETE FROM likes WHERE post_id=?", post_id)
+            post = db.session.query(Posts).filter_by(id=post_id, user_id=session["user_id"]).first()
+            db.session.delete(post)
+            db.session.commit()
+            if db.session.query(Likes).filter_by(post_id=post_id).all():
+                likes = db.session.query(Likes).filter_by(post_id=post_id).all()
+                for like in likes:
+                    db.session.delete(like)
+                db.session.commit()
         except:
             return
         return socketio.emit("postDeleted")

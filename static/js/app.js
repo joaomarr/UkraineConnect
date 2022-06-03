@@ -89,9 +89,9 @@ class Map {
           const coords = [posts[post].lat, posts[post].long];
           const title = posts[post].title;
           const text = posts[post].text;
-          const postDate = new Date(posts[post].date);
+          const postDate = new Date(posts[post].postDate);
           const date = this._formatDate(postDate);
-          const postId = posts[post].id;
+          const postId = posts[post].postId;
 
           const htmlContent = `
             <div class="card text-white bg-dark post" id=${postId} style="max-width: 18rem;">
